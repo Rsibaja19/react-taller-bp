@@ -1,4 +1,6 @@
+import { addDoc, collection } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react'
+import { db } from '../firebase';
 
 const Formulario = () => {
     const [modoEdicion, setModoEdicion] = useState(false);
@@ -26,6 +28,49 @@ const Formulario = () => {
         obtenerImagen();
     }, []);
 
+    const guardar = async (e) => {
+        e.preventDefault()
+        try {
+            const data = await addDoc(collection(db, 'Lista'), {
+                nombre,
+                descripcion,
+                origen,
+                autor,
+                edad,
+                nota,
+                oficio,
+                imagen,
+            })
+
+            setLista([
+                ...lista,
+                {
+                    nombre,
+                    descripcion,
+                    origen,
+                    autor,
+                    edad,
+                    nota,
+                    oficio,
+                    imagen, 
+                    id: data.id
+                }
+            ])
+
+            setNombre('')
+            setDescripcion('')
+            setEdad('')
+            setNota('')
+            setAutor('')
+            setOrigen('')
+            setOficio('')
+            setId('')
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     return (
         <div className='container mt-5'>
             <div className="row">
@@ -38,7 +83,7 @@ const Formulario = () => {
                             modoEdicion ? 'Editar' : 'Agregar'
                         }
                     </h4>
-                    <form >
+                    <form onSubmit={guardar}>
                         <input type="text"
                             className='form-control mb-2'
                             placeholder='Ingrese Nombre'
