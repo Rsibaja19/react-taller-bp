@@ -1,4 +1,4 @@
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, onSnapshot } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react'
 import { db } from '../firebase';
 
@@ -26,6 +26,16 @@ const Formulario = () => {
 
     useEffect(() => {
         obtenerImagen();
+        const obtenerDatos = async () => {
+            try {
+                await onSnapshot(collection(db, 'Lista'), (query) => {
+                    setLista(query.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        obtenerDatos();
     }, []);
 
     const guardar = async (e) => {
@@ -52,7 +62,7 @@ const Formulario = () => {
                     edad,
                     nota,
                     oficio,
-                    imagen, 
+                    imagen,
                     id: data.id
                 }
             ])
@@ -76,6 +86,21 @@ const Formulario = () => {
             <div className="row">
                 <div className="col-8">
                     <h4 className="text-center">Lista</h4>
+                    <ul className="list-group">
+                        {
+                            lista.map(item => (
+                                <li className="list-group-item" key={item.id}>
+                                    <img src={item.imagen} alt={item.nombre} />
+                                    <hr />
+                                    <span className="lead"> {item.nombre} - {item.descripcion} - {item.origen} -</span>
+                                    <span className="lead"> {item.autor} - {item.edad} - {item.oficio} -</span>
+                                    <span className="lead"> {item.nota} </span>
+                                    <button className="btn btn-danger btn-sm float-end mx-2"> Eliminar </button>
+                                    <button className="btn btn-warning btn-sm float-end"> Editar </button>
+                                </li>
+                            ))
+                        }
+                    </ul>
                 </div>
                 <div className="col-4">
                     <h4 className="text-center">
