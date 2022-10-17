@@ -1,4 +1,4 @@
-import { addDoc, collection, onSnapshot } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react'
 import { db } from '../firebase';
 
@@ -81,6 +81,14 @@ const Formulario = () => {
         }
     }
 
+    const eliminar = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'Lista', id))
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     return (
         <div className='container mt-5'>
             <div className="row">
@@ -89,13 +97,13 @@ const Formulario = () => {
                     <ul className="list-group">
                         {
                             lista.map(item => (
-                                <li className="list-group-item" key={item.id}>
+                                <li className="list-group-item text-center" key={item.id}>
                                     <img src={item.imagen} alt={item.nombre} />
                                     <hr />
                                     <span className="lead"> {item.nombre} - {item.descripcion} - {item.origen} -</span>
                                     <span className="lead"> {item.autor} - {item.edad} - {item.oficio} -</span>
                                     <span className="lead"> {item.nota} </span>
-                                    <button className="btn btn-danger btn-sm float-end mx-2"> Eliminar </button>
+                                    <button className="btn btn-danger btn-sm float-end mx-2" onClick={()=>{eliminar(item.id)}}> Eliminar </button>
                                     <button className="btn btn-warning btn-sm float-end"> Editar </button>
                                 </li>
                             ))
