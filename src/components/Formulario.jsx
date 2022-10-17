@@ -1,5 +1,5 @@
-import { addDoc, collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react'
+import { addDoc, collection, deleteDoc, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const Formulario = () => {
@@ -81,9 +81,79 @@ const Formulario = () => {
         }
     }
 
+    const cancelar = () => {
+        setModoEdicion(false)
+        setNombre('')
+        setDescripcion('')
+        setEdad('')
+        setNota('')
+        setAutor('')
+        setOrigen('')
+        setOficio('')
+        setId('')
+    }
     const eliminar = async (id) => {
         try {
             await deleteDoc(doc(db, 'Lista', id))
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const editar = (item) => {
+        setNombre(item.nombre)
+        setDescripcion(item.descripcion)
+        setEdad(item.edad)
+        setNota(item.nota)
+        setAutor(item.autor)
+        setOrigen(item.origen)
+        setOficio(item.oficio)
+        setId(item.id)
+        setImagen(item.imagen)
+        setModoEdicion(true)
+    }
+
+    const editar2 = async e => {
+        e.preventDefault()
+
+        try {
+            const docRef = doc(db, 'Lista', id);
+            await updateDoc(docRef, {
+                nombre,
+                descripcion,
+                origen,
+                autor,
+                edad,
+                nota,
+                oficio,
+                imagen,
+            })
+
+            const nuevoArray = lista.map(
+                item => item.id === id ? {
+                    id: id,
+                    nombre,
+                    descripcion,
+                    origen,
+                    autor,
+                    edad,
+                    nota,
+                    oficio,
+                    imagen,
+                } : item
+            )
+
+            setLista(nuevoArray)
+            setModoEdicion(false)
+            setNombre('')
+            setDescripcion('')
+            setEdad('')
+            setNota('')
+            setAutor('')
+            setOrigen('')
+            setOficio('')
+            setId('')
+
         } catch (error) {
             console.log(error)
         }
@@ -103,8 +173,8 @@ const Formulario = () => {
                                     <span className="lead"> {item.nombre} - {item.descripcion} - {item.origen} -</span>
                                     <span className="lead"> {item.autor} - {item.edad} - {item.oficio} -</span>
                                     <span className="lead"> {item.nota} </span>
-                                    <button className="btn btn-danger btn-sm float-end mx-2" onClick={()=>{eliminar(item.id)}}> Eliminar </button>
-                                    <button className="btn btn-warning btn-sm float-end"> Editar </button>
+                                    <button className="btn btn-danger btn-sm float-end mx-2" onClick={() => { eliminar(item.id) }}> Eliminar </button>
+                                    <button className="btn btn-warning btn-sm float-end" onClick={() => { editar(item) }}> Editar </button>
                                 </li>
                             ))
                         }
@@ -116,7 +186,7 @@ const Formulario = () => {
                             modoEdicion ? 'Editar' : 'Agregar'
                         }
                     </h4>
-                    <form onSubmit={guardar}>
+                    <form onSubmit={modoEdicion ?editar2: guardar}>
                         <input type="text"
                             className='form-control mb-2'
                             placeholder='Ingrese Nombre'
@@ -166,7 +236,7 @@ const Formulario = () => {
                             onChange={(e) => setNota(e.target.value)}
                         />
                         <div className='row my-2'>
-                            <img src={imagen} alt="imagen" className='rounded' width={200} height={200} />
+                            <img src={imagen} alt="imagen" width={200} height={200} />
                         </div>
 
                         {
@@ -175,11 +245,12 @@ const Formulario = () => {
                                     <>
                                         <button
                                             className="btn btn-warning btn-block"
+                                            type='submit'
                                         >
                                             Editar
                                         </button>
                                         <button className="btn btn-dark btn-block mx-2"
-                                        >
+                                            onClick={cancelar}>
                                             Cancelar
                                         </button>
                                     </>
